@@ -180,7 +180,7 @@
                     scheduleId: 1
                 }
             };
-            fetch('http://localhost:8080', {
+            fetch('https://localhost:8080', {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json'
@@ -319,7 +319,7 @@
     }
 
     async function getUnsuccessfulRequestsAmount(day, totalUnsuccessfulRequests) {
-        await fetch('http://localhost:8080/', {
+        await fetch('https://localhost:8080/', {
             method: 'PUT',
             headers: {
                 'Content-type': 'application/json'
@@ -413,7 +413,7 @@
         }
 
 
-        await fetch('http://localhost:8080/get_db_content')
+        await fetch('https://localhost:8080/get_db_content')
             .then(response => response.json())
             .then(data => {
                 dbSingleDays = data;
@@ -474,7 +474,7 @@
                 }
             }
 
-            fetch('http://localhost:8080', {
+            fetch('https://localhost:8080', {
                 method: 'DELETE',
                 headers: {
                     'Content-type': 'application/json'
