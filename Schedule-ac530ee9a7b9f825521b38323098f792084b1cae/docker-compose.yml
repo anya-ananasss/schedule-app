@@ -1,7 +1,7 @@
-version: '3.7' # добавьте версию для совместимости с Docker Compose
+version: '3.7'
 
 volumes:
-  schedules-data: # объявление volumes должно быть в начале файла
+  schedules-data:
 
 services:
   app:
