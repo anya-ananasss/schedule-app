@@ -1,13 +1,20 @@
+version: '3.7' # добавьте версию для совместимости с Docker Compose
+
+volumes:
+  schedules-data: # объявление volumes должно быть в начале файла
+
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always
     environment:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://schedule_db:5432/schedule_db"
     depends_on:
-     - schedule_db
+      - schedule_db
     ports:
-     - "8080:8080"
+      - "8080:8080"
   schedule_db:
     image: postgres
     restart: always
@@ -16,8 +23,7 @@ services:
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: schedule_db
     volumes:
-      -  schedules-data:/var/lib/postgresql/data
+      - schedules-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-volumes:
-  schedules-data:
+
