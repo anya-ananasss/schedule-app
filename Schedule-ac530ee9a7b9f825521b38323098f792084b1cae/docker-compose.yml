@@ -1,18 +1,13 @@
-volumes:
-  schedules-data:
-
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     restart: always
     environment:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://schedule_db:5432/schedule_db"
     depends_on:
-      - schedule_db
+     - schedule_db
     ports:
-      - "8080:8080"
+     - "8080:8080"
   schedule_db:
     image: postgres
     restart: always
@@ -20,8 +15,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: schedule_db
-    volumes:
-      - schedules-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
