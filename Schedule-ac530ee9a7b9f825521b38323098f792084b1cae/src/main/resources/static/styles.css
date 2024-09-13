@@ -65,6 +65,11 @@ td {
     text-decoration: none;
     display: block;
 }
+.greeting-banner {
+    display: flex; /* Используем flexbox для выравнивания */
+    justify-content: flex-end; /* Выравнивание содержимого по правому краю */
+    padding: 10px; /* Добавим немного отступа для красоты */
+}
 
 /* Change color of dropdown links on hover */
 .dropdown-content a:hover {background-color: #ddd;}

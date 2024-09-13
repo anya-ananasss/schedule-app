@@ -1,5 +1,6 @@
 package anya.ooptasks.scheduleapp.schedule.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,10 +32,11 @@ public class Schedule {
         private DayOfWeek day;
     }
 
+
 //    @JsonBackReference
 //    @ManyToOne
-//    @JoinColumn(name = "schedule_id", referencedColumnName = "scheduleId")
-//    private UserScheduleAssignments schedule;
+//    @JoinColumn(name = "users_id", referencedColumnName = "scheduleId")
+//    private Long users_id;
 }
 
 

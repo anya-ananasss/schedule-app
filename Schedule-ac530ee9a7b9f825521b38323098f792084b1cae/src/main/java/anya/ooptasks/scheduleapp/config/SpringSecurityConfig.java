@@ -40,16 +40,15 @@ public class SpringSecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService); // Используйте ваш UserDetailsService
-        authProvider.setPasswordEncoder(passwordEncoder()); // Добавьте PasswordEncoder
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/registration", "/login") // Игнорировать CSRF для /registration
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .disable())
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/registration", "/login").permitAll()
                         .anyRequest().authenticated()

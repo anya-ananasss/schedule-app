@@ -5,6 +5,8 @@ import anya.ooptasks.scheduleapp.schedule.model.Schedule;
 import anya.ooptasks.scheduleapp.schedule.service.ScheduleService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,13 +23,13 @@ public class ScheduleController {
 
 
     @GetMapping("/schedule")
-    public String findAllDays(Model model) {
+    public String initSchedulePage(Model model) {
         List<Schedule> allScheduleDays = scheduleService.findAllDays();
         List<DayOfWeek> presentWeekDays = scheduleService.findAllDistinctDaysOfWeek();
         List<DayOfWeek> allDays = Arrays.stream(DayOfWeek.values()).toList();
         List<LocalTime> startTimes = scheduleService.findAllDistinctStartTimes();
         List<LocalTime> endTimes = scheduleService.findAllDistinctEndTimes();
-
+        String username = "default default";
         String[][] contents = new String[startTimes.size()][presentWeekDays.size()];
 
         for (int day = 0; day < presentWeekDays.size(); day++) {
@@ -40,12 +42,22 @@ public class ScheduleController {
 
         System.out.println(allScheduleDays.size());
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            org.springframework.security.core.userdetails.User us = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+            username = us.getUsername();
+
+        }
+
+
+
         model.addAttribute("defaultContent", contents);
         model.addAttribute("defaultDays", presentWeekDays);
         model.addAttribute("allDays", allDays);
         model.addAttribute("defaultSingleDays", allScheduleDays);
         model.addAttribute("defaultStartTimes", startTimes);
         model.addAttribute("defaultEndTimes", endTimes);
+        model.addAttribute("username", username);
 
         System.out.println("Я ТУТ БЫЛ!!");
         return "schedule";

@@ -12,6 +12,9 @@
     <a></a>
 </div>
 <div id="myElement" data-default-days="[[${defaultDays}]]"></div>
+<div class="greeting-banner" id="greeting-banner">
+    <div> Здравствуйте, <span th:text="${username}"></span>! </div>
+</div>
 <table id="schedule">
     <thead>
     <tr>
@@ -48,7 +51,6 @@
 </div>
 <div id="stateMessage"></div>
 <script th:inline="javascript">
-
     const defaultDays = [[${defaultDays}]];
     const allDays = [[${allDays}]];
 
@@ -126,6 +128,9 @@
         if (defaultDays.length === 7) {
             plusButtonDay.hidden = true;
         }
+        if (scheduleTable.rows === 2) {
+            minusButtonTime.hidden = true;
+        }
 
 
         minusButtonDay.setAttribute('id', 'minusButtonDay');
@@ -172,10 +177,7 @@
                     endTime: endTime,
                     day: scheduleTableArr[0][col]
                 },
-                content: "",
-                schedule: {
-                    scheduleId: 1
-                }
+                content: ""
             };
             fetch('/schedule', {
                 method: 'POST',
@@ -227,6 +229,7 @@
 
             });
         }
+
         if (table.rows.length > 2) {
             minusButtonTime.hidden = false;
         }
@@ -236,11 +239,29 @@
         const table = document.getElementById('schedule');
         const rows = table.getElementsByTagName('tr');
 
-        scheduleTableArr.pop();
 
-
-        for (let col = 2; col < table.rows[0].cells.length - 1; col++) {
+        for (let col = 2; col < table.rows[0].cells.length - 1; col++){
+            let day = {
+                id: {
+                    startTime: scheduleTableArr[table.rows.length-1][0],
+                    endTime: scheduleTableArr[table.rows.length-1][1],
+                    day: col-2
+                }
+            }
+            console.log(day);
+            fetch('/schedule', {
+                method: 'DELETE',
+                headers: {
+                    'Content-type': 'application/json',
+                },
+                body: JSON.stringify(day)
+            }).then(response => {
+                if (response.ok) {
+                    console.log("я скуф....");
+                }
+            });
         }
+        scheduleTableArr.pop();
         table.deleteRow(rows.length - 1);
         if (table.rows.length < 3) {
             minusButtonTime.hidden = true;
@@ -311,8 +332,6 @@
     function saveChanges() {
         const totalUnsuccessfulRequests = saveChanges_db();
         saveChanges_interface(totalUnsuccessfulRequests);
-        saveChanges_db();
-        //TODO: КРЕЙЗИМЕГАКОСТЫЛЬ С ДВОЙНЫМ ВЫЗОВОМ СЕЙВЧЕНДЖЕС_ДБ, ИСПРАВИТЬ!!! СЕЙЧАС НЕ БУДУ ЭТО ДЕЛАТЬ ПОТОМУ ЧТО ХОЧУ ЗАНЯТЬСЯ ЧЕМ-ТО НОВЫМ!!!!!
     }
 
     async function getUnsuccessfulRequestsAmount(day, totalUnsuccessfulRequests) {
@@ -389,6 +408,8 @@
     }
 
     async function saveChanges_db() {
+
+
         let dbSingleDays;
 
         let totalUnsuccessfulRequests = 0;
