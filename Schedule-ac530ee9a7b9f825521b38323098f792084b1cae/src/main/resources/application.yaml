@@ -1,9 +1,16 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/schedule_db
-    username: postgres
-    password: 1234
-    driver-class-name: org.postgresql.Driver
+    primary:
+      jdbc-url: jdbc:postgresql://localhost:5432/schedule_db
+      username: postgres
+      password: 1234
+      driver-class-name: org.postgresql.Driver
+    secondary:
+      jdbc-url: jdbc:postgresql://localhost:5432/users_db
+      username: notpostgres
+      password: 5678
+      driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -13,7 +20,13 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  data:
+   jpa:
+    repositories:
+     enabled: true
+
 logging:
   level:
-    org.springframework.web: DEBUG
-    org.springframework.data.jpa: DEBUG
+    sql: debug
+    web: debug

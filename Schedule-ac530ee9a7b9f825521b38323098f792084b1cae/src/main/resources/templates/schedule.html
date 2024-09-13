@@ -2,7 +2,7 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" href="/styles.css">
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <title>расписание</title>
 </head>
 
@@ -11,7 +11,6 @@
 <div class="topnav">
     <a></a>
 </div>
-
 <div id="myElement" data-default-days="[[${defaultDays}]]"></div>
 <table id="schedule">
     <thead>
@@ -46,9 +45,8 @@
 <div>
     <button id="editButton">Редактировать</button>
     <button id="saveButton" style="display: none">Сохранить изменения</button>
-
 </div>
-<div id="errorMessage"></div>
+<div id="stateMessage"></div>
 <script th:inline="javascript">
 
     const defaultDays = [[${defaultDays}]];
@@ -86,7 +84,6 @@
     console.log("пагнали");
 
     function startEditing() {
-        console.log("ХУУУУУУЙ!!!!");
         saveButton.style.display = "block";
         const table = document.getElementById('schedule');
         let formsCounter = 0;
@@ -159,7 +156,7 @@
 
     function addTimeRow() {
         const table = document.getElementById('schedule');
-        const message = document.getElementById("errorMessage");
+        const message = document.getElementById("stateMessage");
 
         if (!message.hidden) {
             message.hidden = true;
@@ -180,10 +177,10 @@
                     scheduleId: 1
                 }
             };
-            fetch('/', {
+            fetch('/schedule', {
                 method: 'POST',
                 headers: {
-                    'Content-type': 'application/json'
+                    'Content-type': 'application/json',
                 },
                 body: JSON.stringify(newDay)
             }).then(response => {
@@ -319,10 +316,10 @@
     }
 
     async function getUnsuccessfulRequestsAmount(day, totalUnsuccessfulRequests) {
-        await fetch('/', {
+        await fetch('/schedule', {
             method: 'PUT',
             headers: {
-                'Content-type': 'application/json'
+                'Content-type': 'application/json',
             },
             body: JSON.stringify(day)
         }).then(response => {
@@ -355,7 +352,7 @@
             }
         }
 
-        const message = document.getElementById("errorMessage");
+        const message = document.getElementById("stateMessage");
 
         if (totalUnsuccessfulRequests > 0) {
             if (message.hidden) {
@@ -474,10 +471,10 @@
                 }
             }
 
-            fetch('/', {
+            fetch('/schedule', {
                 method: 'DELETE',
                 headers: {
-                    'Content-type': 'application/json'
+                    'Content-type': 'application/json',
                 },
                 body: JSON.stringify(day)
             }).then(response => {

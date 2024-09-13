@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Registration or Sign Up form in HTML CSS | CodingLab </title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrapper">
+    <h2>Registration</h2>
+    <form action="#">
+        <div class="input-box">
+            <input type="text" id="username" placeholder="Введите имя пользователя" required>
+        </div>
+        <div class="input-box">
+            <input type="email" id="email" placeholder="Введите адрес электронной почты" required>
+        </div>
+        <div class="input-box">
+            <input type="password" id="password" placeholder="Придумайте пароль" required>
+        </div>
+        <div class="input-box">
+            <input type="password" id="confirmPassword" placeholder="Повторите пароль" required>
+        </div>
+        <div class="input-box button">
+            <input type="submit" id="saveButton" value="Зарегистрироваться">
+        </div>
+    </form>
+    <div id="stateMessage"></div>
+</div>
+
+
+<script th:inline="javascript">
+    const saveButton = document.getElementById("saveButton");
+    const message = document.getElementById("stateMessage");
+
+    const usernameInput = document.getElementById("username");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = document.getElementById("confirmPassword");
+    function saveUser_fetchReq (){
+        const username = usernameInput.value;
+        const email = emailInput.value;
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        if (password !== confirmPassword) {
+           message.textContent = "пароль чекни дурик";
+        }else {
+
+            let newUser = {
+                username: username,
+                email: email,
+                password: password
+            };
+            console.log(newUser);
+            fetch('/registration', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(newUser)
+            }).then(response => {
+                if (response.ok) {
+                    message.textContent = "ну молодец чо";
+                    window.location.href = '/login'; // Замените '/login' на URL вашей страницы логина
+                } else {
+                    message.textContent = "ха, лох";
+                }
+
+            });
+        }
+    }
+    saveButton.addEventListener('click', saveUser_fetchReq);
+</script>
+</body>
+</html>

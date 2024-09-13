@@ -1,8 +1,8 @@
-package anya.ooptasks.scheduleapp.service;
+package anya.ooptasks.scheduleapp.schedule.service;
 
 
-import anya.ooptasks.scheduleapp.model.Schedules;
-import anya.ooptasks.scheduleapp.repository.SchedulesRepository;
+import anya.ooptasks.scheduleapp.schedule.model.Schedule;
+import anya.ooptasks.scheduleapp.schedule.repository.ScheduleRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +13,8 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class SchedulesService {
-    private final SchedulesRepository repository;
+public class ScheduleService {
+    private final ScheduleRepository repository;
 
     public void examineNewTimeline(LocalTime startTime, LocalTime endTime) {
         List<LocalTime> endTimes = findAllDistinctEndTimes();
@@ -36,16 +36,16 @@ public class SchedulesService {
         System.out.println("эй гайс у меня все найс");
     }
 
-    public void saveChanges(Schedules updated) {
+    public void saveChanges(Schedule updated) {
         repository.save(updated);
     }
 
-    public List<Schedules> findAllDays() {
+    public List<Schedule> findAllDays() {
         System.out.println("приплыли");
         return repository.findAllOrdered();
     }
 
-    public void deleteAllById(Schedules.JointId id) {
+    public void deleteAllById(Schedule.JointId id) {
         repository.deleteAllById(id);
     }
 
@@ -61,7 +61,7 @@ public class SchedulesService {
         return repository.findAllDistinctEndTimes();
     }
 
-    public List<Schedules.JointId> findAllIds() {
+    public List<Schedule.JointId> findAllIds() {
         return repository.findAllIds();
     }
 

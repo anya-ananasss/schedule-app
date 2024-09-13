@@ -1,6 +1,5 @@
-package anya.ooptasks.scheduleapp.model;
+package anya.ooptasks.scheduleapp.schedule.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +12,7 @@ import java.time.LocalTime;
 @Entity
 @Getter
 @Setter
-public class Schedules {
+public class Schedule {
     @EmbeddedId
     private JointId id;
     private String content;
