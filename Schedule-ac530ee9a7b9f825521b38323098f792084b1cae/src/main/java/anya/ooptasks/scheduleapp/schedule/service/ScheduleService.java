@@ -3,6 +3,7 @@ package anya.ooptasks.scheduleapp.schedule.service;
 
 import anya.ooptasks.scheduleapp.schedule.model.Schedule;
 import anya.ooptasks.scheduleapp.schedule.repository.ScheduleRepository;
+import anya.ooptasks.scheduleapp.user.model.User;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +17,8 @@ import java.util.List;
 public class ScheduleService {
     private final ScheduleRepository repository;
 
-    public void examineNewTimeline(LocalTime startTime, LocalTime endTime) {
-        List<LocalTime> endTimes = findAllDistinctEndTimes();
+    public void examineNewTimeline(LocalTime startTime, LocalTime endTime, User userId) {
+        List<LocalTime> endTimes = findAllDistinctEndTimes(userId);
         if (startTime == null || endTime == null) {
             throw new RuntimeException("Start or end time is null");
         }
@@ -36,33 +37,39 @@ public class ScheduleService {
         System.out.println("эй гайс у меня все найс");
     }
 
+    public void createDefaultSchedule (User user){
+       Schedule schedule = new Schedule(new Schedule.JointId(DayOfWeek.MONDAY, LocalTime.parse("08:00"), LocalTime.parse("09:30")),
+               " ", user);
+       repository.save(schedule);
+    }
+
     public void saveChanges(Schedule updated) {
         repository.save(updated);
     }
 
-    public List<Schedule> findAllDays() {
+    public List<Schedule> findAllDays(User userId) {
         System.out.println("приплыли");
-        return repository.findAllOrdered();
+        return repository.findAllOrdered(userId);
     }
 
-    public void deleteAllById(Schedule.JointId id) {
-        repository.deleteAllById(id);
+    public void deleteAllById(Schedule.JointId id, User userId) {
+        repository.deleteAllById(id, userId);
     }
 
-    public List<DayOfWeek> findAllDistinctDaysOfWeek() {
-        return repository.findAllDistinctDays();
+    public List<DayOfWeek> findAllDistinctDaysOfWeek(User userId) {
+        return repository.findAllDistinctDays(userId);
     }
 
-    public List<LocalTime> findAllDistinctStartTimes() {
-        return repository.findAllDistinctStartTimes();
+    public List<LocalTime> findAllDistinctStartTimes(User userId) {
+        return repository.findAllDistinctStartTimes(userId);
     }
 
-    public List<LocalTime> findAllDistinctEndTimes() {
-        return repository.findAllDistinctEndTimes();
+    public List<LocalTime> findAllDistinctEndTimes(User userId) {
+        return repository.findAllDistinctEndTimes(userId);
     }
 
-    public List<Schedule.JointId> findAllIds() {
-        return repository.findAllIds();
+    public List<Schedule.JointId> findAllIds(User userId) {
+        return repository.findAllIds(userId);
     }
 
 

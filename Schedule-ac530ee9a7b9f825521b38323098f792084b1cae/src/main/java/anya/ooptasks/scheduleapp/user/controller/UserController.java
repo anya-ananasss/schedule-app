@@ -1,6 +1,7 @@
 package anya.ooptasks.scheduleapp.user.controller;
 
 import anya.ooptasks.scheduleapp.exceptions.UserAlreadyExistException;
+import anya.ooptasks.scheduleapp.schedule.service.ScheduleService;
 import anya.ooptasks.scheduleapp.user.model.User;
 import anya.ooptasks.scheduleapp.user.service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-
+    private final ScheduleService scheduleService;
     @GetMapping("/registration")
     public String showRegistrationForm(Model model) {
 
@@ -47,6 +48,7 @@ public class UserController {
         System.out.println("я не ом");
         try {
             userService.registerNewUserAccount(user);
+            scheduleService.createDefaultSchedule(user);
             return new ResponseEntity<>(HttpStatus.ACCEPTED);
         } catch (UserAlreadyExistException userEx) {
            return new ResponseEntity<>(HttpStatus.CONFLICT);

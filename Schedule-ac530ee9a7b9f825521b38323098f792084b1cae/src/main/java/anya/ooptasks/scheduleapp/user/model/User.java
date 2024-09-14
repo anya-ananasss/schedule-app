@@ -1,6 +1,6 @@
 package anya.ooptasks.scheduleapp.user.model;
 
-import anya.ooptasks.scheduleapp.user.annotations.PasswordMatches;
+import anya.ooptasks.scheduleapp.schedule.model.Schedule;
 import anya.ooptasks.scheduleapp.user.annotations.ValidEmail;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -10,21 +10,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@PasswordMatches
 @Table(name = "users")
 public class User {
-    @Getter
-    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 1)
-    private Long id;
+    private int id;
     @NotNull
     @NotEmpty
     private String username;
@@ -38,13 +37,15 @@ public class User {
     @NotEmpty
     private String password;
 
-    @Transient
-    private String matchingPassword;
-
     private String authority;
 
+    @Transient
+    @OneToMany(mappedBy="user_id")
+    private Set<Schedule> schedules;
 
 
-
+    public User(int id) {
+        this.id = id;
+    }
 }
 

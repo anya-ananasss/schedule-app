@@ -40,4 +40,8 @@ public class UserService {
     private boolean nicknameExists(String username) {
         return repository.findByUsername(username) != null;
     }
+
+    public int findIdByUsername (String username) { return repository.findIdByUsername(username);}
+
+    public User findUserById (int id) {return  repository.findUserById(id);}
 }
