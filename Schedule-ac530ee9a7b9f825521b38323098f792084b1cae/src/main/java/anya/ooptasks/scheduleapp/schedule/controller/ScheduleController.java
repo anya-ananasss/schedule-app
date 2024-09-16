@@ -95,10 +95,6 @@ public class ScheduleController {
     @DeleteMapping("/schedule/{userId}")
     public void deleteElement(@RequestBody Schedule schedule, @PathVariable int userId) {
         schedule.getId().setUserId(userService.findUserById(userId));
-        System.out.println(schedule.getId().getDay());
-        System.out.println(schedule.getId().getUserId().getId());
-        System.out.println(schedule.getId().getStartTime());
-        System.out.println(schedule.getId().getEndTime());
         scheduleService.deleteAllById(schedule.getId());
     }
 }
