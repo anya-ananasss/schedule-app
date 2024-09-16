@@ -1,7 +1,6 @@
 package anya.ooptasks.scheduleapp.user.model;
 
 import anya.ooptasks.scheduleapp.schedule.model.Schedule;
-import anya.ooptasks.scheduleapp.user.annotations.ValidEmail;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -21,8 +20,8 @@ import java.util.Set;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_seq")
+    @SequenceGenerator(name = "users_id_seq", sequenceName = "users_id_seq", allocationSize = 1)
     private int id;
     @NotNull
     @NotEmpty
@@ -30,7 +29,6 @@ public class User {
 
     @NotNull
     @NotEmpty
-    @ValidEmail
     private String email;
 
     @NotNull

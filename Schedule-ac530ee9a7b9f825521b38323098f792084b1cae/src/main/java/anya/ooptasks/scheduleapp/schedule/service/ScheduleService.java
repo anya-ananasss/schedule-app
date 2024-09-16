@@ -33,13 +33,11 @@ public class ScheduleService {
             }
 
         }
-
-        System.out.println("эй гайс у меня все найс");
     }
 
     public void createDefaultSchedule (User user){
-       Schedule schedule = new Schedule(new Schedule.JointId(DayOfWeek.MONDAY, LocalTime.parse("08:00"), LocalTime.parse("09:30")),
-               " ", user);
+       Schedule schedule = new Schedule(new Schedule.JointId(DayOfWeek.MONDAY, LocalTime.parse("08:00"), LocalTime.parse("09:30"), user),
+               " ");
        repository.save(schedule);
     }
 
@@ -48,12 +46,11 @@ public class ScheduleService {
     }
 
     public List<Schedule> findAllDays(User userId) {
-        System.out.println("приплыли");
         return repository.findAllOrdered(userId);
     }
 
-    public void deleteAllById(Schedule.JointId id, User userId) {
-        repository.deleteAllById(id, userId);
+    public void deleteAllById(Schedule.JointId id) {
+        repository.deleteAllById(id);
     }
 
     public List<DayOfWeek> findAllDistinctDaysOfWeek(User userId) {

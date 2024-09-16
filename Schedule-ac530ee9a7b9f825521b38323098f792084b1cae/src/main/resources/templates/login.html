@@ -1,29 +1,26 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
     <meta charset="UTF-8">
-    <title>логин</title>
+    <title>Войти</title>
 </head>
 <body>
-<h1>Login</h1>
-<form name='f' action="/login" method='POST'>
-    <table>
-        <tr>
-            <td>User:</td>
-            <td><input type='text' name='username' value=''></td>
-        </tr>
-        <tr>
-            <td>Password:</td>
-            <td><input type='password' name='password' /></td>
-        </tr>
-        <tr>
-            <td><input name="submit" type="submit" value="submit" /></td>
+<div class="wrapper">
+    <h2>Вход</h2>
+    <form name='f' action="/login" method='POST'>
+        <div>Имя пользователя:</div>
 
-        </tr>
+        <div><input type='text' name='username' value=''/></div>
 
-    </table>
-    <div>Новый пользователь?</div>
-    <div><a href="/registration">Зарегистрироваться</a></div>
-</form>
+        <div>Пароль:</div>
+
+        <div><input type='password' name='password'/></div>
+        <div><input name="submit" type="submit" value="Войти"/></div>
+
+        <div>Новый пользователь? <a href="/registration">Зарегистрироваться</a></div>
+        <div id="stateMessage" th:text="${stateMessage}"></div>
+    </form>
+</div>
 </body>
 </html>

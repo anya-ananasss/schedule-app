@@ -13,22 +13,22 @@ import java.util.List;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Schedule.JointId> {
 
-    @Query("SELECT DISTINCT day.id.day FROM Schedule day WHERE day.userId = :userId ORDER BY day.id.day")
+    @Query("SELECT DISTINCT day.id.day FROM Schedule day WHERE day.id.userId = :userId ORDER BY day.id.day")
     List<DayOfWeek> findAllDistinctDays(User userId);
 
-    @Query("SELECT DISTINCT day.id.startTime FROM Schedule day WHERE day.userId = :userId ORDER BY day.id.startTime")
+    @Query("SELECT DISTINCT day.id.startTime FROM Schedule day WHERE day.id.userId = :userId ORDER BY day.id.startTime")
     List<LocalTime> findAllDistinctStartTimes(User userId);
 
-    @Query("SELECT DISTINCT day.id.endTime FROM Schedule day WHERE day.userId = :userId ORDER BY day.id.endTime")
+    @Query("SELECT DISTINCT day.id.endTime FROM Schedule day WHERE day.id.userId = :userId ORDER BY day.id.endTime")
     List<LocalTime> findAllDistinctEndTimes(User userId);
 
-    @Query("SELECT day FROM Schedule day WHERE day.userId = :userId ORDER BY day.id.day, day.id.startTime")
+    @Query("SELECT day FROM Schedule day WHERE day.id.userId = :userId ORDER BY day.id.day, day.id.startTime")
     List<Schedule> findAllOrdered(User userId);
 
     @Modifying
-    @Query ("DELETE FROM Schedule day WHERE day.id = :id and day.userId = :userId")
-    void deleteAllById(Schedule.JointId id, User userId);
+    @Query ("DELETE FROM Schedule day WHERE day.id = :id")
+    void deleteAllById(Schedule.JointId id);
 
-    @Query ("SELECT day.id FROM Schedule day WHERE day.userId = :userId")
+    @Query ("SELECT day.id FROM Schedule day WHERE day.id.userId = :userId")
     List<Schedule.JointId> findAllIds (User userId);
 }

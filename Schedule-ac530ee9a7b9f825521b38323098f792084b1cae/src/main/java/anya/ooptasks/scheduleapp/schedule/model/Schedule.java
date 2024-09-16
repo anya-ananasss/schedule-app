@@ -1,7 +1,6 @@
 package anya.ooptasks.scheduleapp.schedule.model;
 
 import anya.ooptasks.scheduleapp.user.model.User;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,13 +37,14 @@ public class Schedule {
         @Column(columnDefinition = "time without time zone")
         @DateTimeFormat(pattern = "H:mm")
         private LocalTime endTime;
-
+        @ManyToOne
+        @JoinColumn(name = "user_id", referencedColumnName = "id")
+        private User userId;
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof JointId)) return false;
-            JointId jointId = (JointId) o;
+            if (!(o instanceof JointId jointId)) return false;
             return Objects.equals(day, jointId.day) &&
                     Objects.equals(startTime, jointId.startTime) &&
                     Objects.equals(endTime, jointId.endTime);
@@ -56,9 +56,7 @@ public class Schedule {
         }
     }
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User userId;
+
 }
 
 

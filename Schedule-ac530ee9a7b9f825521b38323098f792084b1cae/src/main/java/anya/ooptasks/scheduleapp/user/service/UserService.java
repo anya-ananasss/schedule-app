@@ -1,11 +1,11 @@
 package anya.ooptasks.scheduleapp.user.service;
 
 
+import anya.ooptasks.scheduleapp.exceptions.EmailAlreadyExistException;
 import anya.ooptasks.scheduleapp.user.model.User;
 import anya.ooptasks.scheduleapp.user.repository.UserRepository;
-import anya.ooptasks.scheduleapp.exceptions.UserAlreadyExistException;
+import anya.ooptasks.scheduleapp.exceptions.UsernameAlreadyExistException;
 import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,19 +17,17 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
 
-    public void registerNewUserAccount(User user) throws UserAlreadyExistException {
-        System.out.println("aaaaa");
+    public void registerNewUserAccount(User user) throws UsernameAlreadyExistException, EmailAlreadyExistException{
         if (emailExists(user.getEmail())) {
-            throw new UserAlreadyExistException("There is an account with that email address: "
+            throw new EmailAlreadyExistException("There is an account with that email address: "
                     + user.getEmail());
         }
         if (nicknameExists(user.getUsername())) {
-            throw new UserAlreadyExistException("There is an account with that nickname"
+            throw new UsernameAlreadyExistException("There is an account with that nickname"
                     + user.getUsername());
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setAuthority("ROLE_USER");
-        System.out.println(user.getPassword());
         repository.save(user);
     }
 

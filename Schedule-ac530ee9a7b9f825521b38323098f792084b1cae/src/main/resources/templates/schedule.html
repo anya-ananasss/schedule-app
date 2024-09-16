@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" type="text/css" href="/styles.css">
     <meta charset="UTF-8"/>
-    <title>расписание</title>
+    <title>Расписание</title>
 </head>
 
 <body>
-<h1>Schedule</h1>
+<h1>Расписание v. 1.0</h1>
 <div class="topnav">
-    <a></a>
+      Здравствуйте, <span th:text="${username}"></span>! <a href="/logout">Выйти</a>
 </div>
+
 <div id="myElement" data-default-days="[[${defaultDays}]]"></div>
-<div class="greeting-banner" id="greeting-banner">
-    <div> Здравствуйте, <span th:text="${username}"></span>!</div>
-</div>
+
 <table id="schedule">
     <thead>
     <tr>
@@ -56,7 +55,6 @@
 <script th:inline="javascript">
 
     const userId = [[${userId}]];
-    console.log(userId);
 
     const defaultDays = [[${defaultDays}]];
     const allDays = [[${allDays}]];
@@ -90,7 +88,6 @@
     const plusButtonDay = document.createElement('button');
     const minusButtonDay = document.createElement('button');
 
-    console.log("пагнали");
 
     function startEditing() {
         saveButton.style.display = "block";
@@ -135,7 +132,8 @@
         if (defaultDays.length === 7) {
             plusButtonDay.hidden = true;
         }
-        if (scheduleTable.rows === 2) {
+
+        if (scheduleTable.rows.length <= 2) {
             minusButtonTime.hidden = true;
         }
 
@@ -143,6 +141,11 @@
         minusButtonDay.setAttribute('id', 'minusButtonDay');
         minusButtonDay.textContent = '-';
         plusButtonDay.insertAdjacentElement('afterend', minusButtonDay);
+
+
+        if (scheduleTable.rows[0].cells.length <= 4) {
+            minusButtonDay.hidden = true;
+        }
 
 
         editButton.hidden = true;
@@ -173,7 +176,6 @@
         if (!message.hidden) {
             message.hidden = true;
         }
-
         const startTime = prompt("Введите время начала");
         const endTime = prompt("Введите время конца");
 
@@ -238,7 +240,7 @@
             });
         }
 
-        if (table.rows.length > 2) {
+        if (minusButtonTime.hidden) {
             minusButtonTime.hidden = false;
         }
     }
@@ -257,17 +259,13 @@
                 }
             }
             console.log(day);
-            fetch('/schedule/'+userId, {
+            fetch('/schedule/{userId}', {
                 method: 'DELETE',
                 headers: {
                     'Content-type': 'application/json',
                 },
                 body: JSON.stringify(day)
-            }).then(response => {
-                if (response.ok) {
-                    console.log("я скуф....");
-                }
-            });
+            })
         }
         scheduleTableArr.pop();
         table.deleteRow(rows.length - 1);
@@ -416,7 +414,6 @@
 
         let inputs = document.querySelectorAll('input[type="text"]');
 
-        console.log("ай да хрен с ним");
         for (let row = 0; row < table.rows.length; row++) {
             for (let col = 0; col < table.rows[0].cells.length - 1; col++) {
                 if (row === 0) {
@@ -425,11 +422,9 @@
                     scheduleTableArr[row][col] = inputs[formsCounter].value;
                     formsCounter++;
                 }
-                console.log(scheduleTableArr[row][col]);
             }
         }
 
-        console.log("ДБ");
         for (let row = 1; row < scheduleTableArr.length; row++) {
             for (let col = 2; col < scheduleTableArr[0].length; col++) {
                 let day = {
@@ -441,7 +436,6 @@
                     content: scheduleTableArr[row][col],
                     userId: userId
                 }
-                console.log(day);
                 totalUnsuccessfulRequests += await getUnsuccessfulRequestsAmount(day, totalUnsuccessfulRequests);
             }
         }
@@ -514,11 +508,7 @@
                     'Content-type': 'application/json',
                 },
                 body: JSON.stringify(day)
-            }).then(response => {
-                if (response.ok) {
-                    console.log("я скуф....");
-                }
-            });
+            })
         }
     }
 
