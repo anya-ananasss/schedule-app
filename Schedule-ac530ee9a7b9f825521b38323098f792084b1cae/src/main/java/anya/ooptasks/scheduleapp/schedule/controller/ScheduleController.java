@@ -17,6 +17,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 @AllArgsConstructor
@@ -51,10 +52,6 @@ public class ScheduleController {
         scheduleService.findAllDays(user);
 
 
-
-
-
-
         model.addAttribute("defaultContent", contents);
         model.addAttribute("defaultDays", presentWeekDays);
         model.addAttribute("allDays", allDays);
@@ -74,28 +71,41 @@ public class ScheduleController {
         return scheduleService.findAllIds(user);
     }
 
-    @ResponseBody
-    @PostMapping("/schedule/{userId}")
-    public void examineNewTimeValues(@RequestBody Schedule schedule, @PathVariable int userId) {
-        LocalTime startTime = schedule.getId().getStartTime();
-        LocalTime endTime = schedule.getId().getEndTime();
-        User user = userService.findUserById(userId);
-        scheduleService.examineNewTimeline(startTime, endTime, user);
-    }
 
     @ResponseBody
     @Transactional
     @PutMapping("/schedule/{userId}")
+    public void updateChanges(@RequestBody Schedule schedule, @PathVariable int userId) {
+        schedule.getId().setUserId(userService.findUserById(userId));
+        if (Objects.isNull(schedule.getId().getStartTime())){
+            scheduleService.updateByTime(schedule.getId().getEndTime(), schedule);
+        } else if(Objects.isNull(schedule.getId().getEndTime())) {
+            scheduleService.updateByTime(schedule.getId().getStartTime(), schedule);
+        } else {
+            scheduleService.updateChanges(schedule);
+        }
+    }
+    @ResponseBody
+    @Transactional
+    @PostMapping("/schedule/{userId}")
     public void saveChanges(@RequestBody Schedule schedule, @PathVariable int userId) {
         schedule.getId().setUserId(userService.findUserById(userId));
         scheduleService.saveChanges(schedule);
     }
+
     @ResponseBody
     @Transactional
     @DeleteMapping("/schedule/{userId}")
     public void deleteElement(@RequestBody Schedule schedule, @PathVariable int userId) {
         schedule.getId().setUserId(userService.findUserById(userId));
-        scheduleService.deleteAllById(schedule.getId());
+        if (Objects.isNull(schedule.getId().getDay())) {
+            scheduleService.deleteAllByTime(schedule.getId().getStartTime(),
+                    schedule.getId().getEndTime(),
+                    schedule.getId().getUserId());
+        } else if (Objects.isNull(schedule.getId().getStartTime())) {
+            scheduleService.deleteAllByDay(schedule.getId().getDay(),
+                    schedule.getId().getUserId());
+        }
     }
 }
 

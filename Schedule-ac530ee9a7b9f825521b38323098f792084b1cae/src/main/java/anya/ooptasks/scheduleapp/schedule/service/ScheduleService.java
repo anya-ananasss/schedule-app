@@ -17,24 +17,6 @@ import java.util.List;
 public class ScheduleService {
     private final ScheduleRepository repository;
 
-    public void examineNewTimeline(LocalTime startTime, LocalTime endTime, User userId) {
-        List<LocalTime> endTimes = findAllDistinctEndTimes(userId);
-        if (startTime == null || endTime == null) {
-            throw new RuntimeException("Start or end time is null");
-        }
-        if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
-            throw new RuntimeException("Start time must be less than end time");
-        }
-
-        if (endTimes.size() > 1) {
-            LocalTime prevEndTime = endTimes.get(endTimes.size() - 1);
-            if (prevEndTime.isAfter(startTime)) {
-                throw new RuntimeException("Current start time must be less than previous end time");
-            }
-
-        }
-    }
-
     public void createDefaultSchedule (User user){
        Schedule schedule = new Schedule(new Schedule.JointId(DayOfWeek.MONDAY, LocalTime.parse("08:00"), LocalTime.parse("09:30"), user),
                " ");
@@ -44,13 +26,25 @@ public class ScheduleService {
     public void saveChanges(Schedule updated) {
         repository.save(updated);
     }
+    public void updateChanges(Schedule updated) {
+        repository.updateSch(updated.getId(), updated.getContent());
+    }
+
+    public void updateByTime(LocalTime time, Schedule schedule) {
+        repository.updateAllByTime(time, schedule.getId().getStartTime(),
+                schedule.getId().getEndTime(), schedule.getContent());
+    }
+
 
     public List<Schedule> findAllDays(User userId) {
         return repository.findAllOrdered(userId);
     }
 
-    public void deleteAllById(Schedule.JointId id) {
-        repository.deleteAllById(id);
+    public void deleteAllByTime(LocalTime startTime, LocalTime endTime, User userId) {
+        repository.deleteAllByTime(startTime, endTime, userId);
+    }
+   public void deleteAllByDay(DayOfWeek day, User userId) {
+        repository.deleteAllByDay(day, userId);
     }
 
     public List<DayOfWeek> findAllDistinctDaysOfWeek(User userId) {

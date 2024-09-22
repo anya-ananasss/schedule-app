@@ -9,10 +9,17 @@
 <body>
 <h1>Расписание v. 1.0</h1>
 <div class="topnav">
-      Здравствуйте, <span th:text="${username}"></span>! <a href="/logout">Выйти</a>
+    Здравствуйте, <span th:text="${username}"></span>! <a href="/logout">Выйти</a>
 </div>
 
 <div id="myElement" data-default-days="[[${defaultDays}]]"></div>
+
+<div style="display: none" class="spinner">
+    <button class="button" id="increase">▲</button>
+    <input type="text" class="input-field" id="value" value="00" readonly>
+    <button class="button" id="decrease">▼</button>
+</div>
+
 
 <table id="schedule">
     <thead>
@@ -49,38 +56,46 @@
     <button id="saveButton" style="display: none">Сохранить изменения</button>
 </div>
 <div id="stateMessage"></div>
-
+<div id="spinner-container"></div>
 <div id="hiddenUserId" style="display: none;" th:text="${userId}"></div>
 
 <script th:inline="javascript">
+
+    const container = document.getElementById('spinner-container');
+
+    const input = document.createElement("input");
+    input.type = "number";
+    input.min="0";
+    input.max="10";
+    input.step="2";
+    input.value = "6";
+   container.appendChild(input);
+
+    /*
+    АВЧОМ СУТЬ?
+    суть: defaultDays, startTimes и endTimes оставляем нетронутыми
+    в процессе редактирования ориентируемся только на то, что есть в таблице;
+    при изменении в спиннере апдейтим таблицу;
+    при сохранении - сравниваем каждую ячейку с тем, что есть в defaults:
+    совпадает время и день - put;
+    совпадает что-то одно/не совпадает ничего - post, старое delete;
+    */
+
+    let formsCounter = 1;
+    let timeFormsCounter = 1;
 
     const userId = [[${userId}]];
 
     const defaultDays = [[${defaultDays}]];
     const allDays = [[${allDays}]];
+    const defaultStartTimes = [[${defaultStartTimes}]];
+    const defaultEndTimes = [[${defaultEndTimes}]];
 
     const scheduleTable = document.getElementById('schedule');
-    let scheduleTableArr = new Array(scheduleTable.rows.length);
-    let origTableArr = new Array(scheduleTable.rows.length);
 
-    if (scheduleTable.rows.length > 0) {
-        for (let i = 0; i < scheduleTable.rows.length; i++) {
-            scheduleTableArr[i] = new Array(scheduleTable.rows[0].cells.length - 1);
-            origTableArr[i] = new Array(scheduleTable.rows[0].cells.length - 1);
-        }
-
-        for (let i = 0; i < scheduleTable.rows.length; i++) {
-            for (let j = 0; j < scheduleTable.rows[0].cells.length - 1; j++) {
-                if (scheduleTable.rows[i].cells[j]) {
-                    scheduleTableArr[i][j] = scheduleTable.rows[i].cells[j].innerHTML;
-                    origTableArr[i][j] = scheduleTable.rows[i].cells[j].innerHTML;
-                }
-            }
-        }
-    }
 
     const editButton = document.getElementById('editButton');
-    const saveButton = document.getElementById("saveButton");
+    const saveButton = document.getElementById('saveButton');
 
     const plusButtonTime = document.createElement('button');
     const minusButtonTime = document.createElement('button');
@@ -91,12 +106,55 @@
 
     function startEditing() {
         saveButton.style.display = "block";
+        plusButtonTime.style.display = "inline";
+        minusButtonTime.style.display = "inline";
+        plusButtonDay.style.display = "inline";
+        minusButtonDay.style.display = "inline";
+        editButton.style.display = "none"
+
         const table = document.getElementById('schedule');
-        let formsCounter = 0;
 
         let currCell;
+        //edit time cells
         for (let i = 1; i < table.rows.length; i++) {
-            for (let j = 0; j < table.rows[0].cells.length - 1; j++) {
+            for (let j = 0; j < 2; j++) {
+                currCell = table.rows[i].cells[j];
+
+                const hour = currCell.innerHTML.split(":")[0];
+                const minute = currCell.innerHTML.split(":")[1];
+
+                const spinnerH = createSpinner();
+                const spinnerM = createSpinner();
+                spinnerH.id = "spinner" + timeFormsCounter; //час
+                timeFormsCounter++;
+                spinnerH.setHourMode();
+
+                spinnerM.id = "spinner" + timeFormsCounter; //минута
+                timeFormsCounter++;
+                spinnerM.setMinuteMode();
+
+
+                spinnerH.setValue(hour);
+                spinnerM.setValue(minute);
+
+
+                const container = document.createElement('div');
+                container.style.display = 'flex'; // Используем flexbox для расположения спиннеров
+                container.style.alignItems = 'center'; // Выравниваем по центру по вертикали
+
+                // Добавляем спиннеры в контейнер
+                container.appendChild(spinnerH);
+                container.appendChild(spinnerM);
+
+                currCell.innerHTML = ""; // Очищаем ячейку
+                currCell.appendChild(container); // Добавляем контейнер в ячейку
+
+            }
+        }
+
+        //edit other
+        for (let i = 1; i < table.rows.length; i++) {
+            for (let j = 2; j < table.rows[0].cells.length - 1; j++) {
                 currCell = table.rows[i].cells[j];
                 const form = document.createElement("form");
                 form.id = "form" + formsCounter;
@@ -106,6 +164,12 @@
                 const input = document.createElement("input");
                 input.type = "text";
                 input.value = currCell.innerHTML;
+
+                input.maxLength = 50;
+                input.addEventListener('input', function () {
+                    this.value = this.value.replace(/[\r\n]/g, '');
+                });
+
                 form.appendChild(input);
                 currCell.innerHTML = "";
                 currCell.appendChild(form);
@@ -142,13 +206,9 @@
         minusButtonDay.textContent = '-';
         plusButtonDay.insertAdjacentElement('afterend', minusButtonDay);
 
-
-        if (scheduleTable.rows[0].cells.length <= 4) {
-            minusButtonDay.hidden = true;
+        if (scheduleTable.rows[0].cells.length < 5) {
+            minusButtonDay.style.display = "none";
         }
-
-
-        editButton.hidden = true;
 
         plusButtonTime.addEventListener('click', addTimeRow);
         minusButtonTime.addEventListener('click', removeTimeRow);
@@ -170,131 +230,87 @@
     editButton.addEventListener('click', startEditing);
 
     function addTimeRow() {
-        const table = document.getElementById('schedule');
+
+        const table = document.getElementById("schedule");
         const message = document.getElementById("stateMessage");
 
-        if (!message.hidden) {
-            message.hidden = true;
-        }
-        const startTime = prompt("Введите время начала");
-        const endTime = prompt("Введите время конца");
 
-        for (let col = 2; col < table.rows[0].cells.length - 1; col++) {
-            let newDay = {
-                id: {
-                    startTime: startTime,
-                    endTime: endTime,
-                    day: scheduleTableArr[0][col]
-                },
-                content: "",
-                userId: userId
-            };
-            fetch('/schedule/'+userId, {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json',
-                },
-                body: JSON.stringify(newDay)
-            }).then(response => {
-                if (response.ok) {
-                    if (col === table.rows[0].cells.length - 2) {
-                        let newRow = table.insertRow();
-                        for (let i = 0; i < table.rows[0].cells.length - 1; i++) {
-                            let currCell = newRow.insertCell();
-                            const form = document.createElement("form");
-                            form.action = "";
-                            form.method = "put";
-                            const input = document.createElement("input");
-                            input.type = "text";
-                            if (currCell.cellIndex === 0) {
-                                input.value = startTime;
-                            } else if (currCell.cellIndex === 1) {
-                                input.value = endTime;
-                            } else {
-                                input.value = "";
-                            }
-                            form.appendChild(input);
-                            currCell.appendChild(form);
-                        }
-                        let newRowArr = Array(scheduleTableArr[0].length);
-                        for (let i = 0; i < newRowArr.length; i++) {
-                            if (i === 0) {
-                                newRowArr[i] = startTime;
-                            } else if (i === 1) {
-                                newRowArr[i] = endTime;
-                            } else {
-                                newRowArr[i] = "";
-                            }
-                        }
-                        scheduleTableArr.push(newRowArr);
-                    }
-                } else {
-                    if (message.hidden) {
-                        message.hidden = false;
-                    }
-                    message.style.color = "red";
-                    message.textContent = "Произошла ошибка! Проверьте корректность введенных данных";
+        const auxH = document.getElementById("spinner" + (timeFormsCounter - 2)).getValue();
+        const auxM = document.getElementById("spinner" + (timeFormsCounter - 1)).getValue();
 
-                }
-
-            });
-        }
-
-        if (minusButtonTime.hidden) {
-            minusButtonTime.hidden = false;
-        }
-    }
-
-    function removeTimeRow() {
-        const table = document.getElementById('schedule');
-        const rows = table.getElementsByTagName('tr');
-
-
-        for (let col = 2; col < table.rows[0].cells.length - 1; col++) {
-            let day = {
-                id: {
-                    startTime: scheduleTableArr[table.rows.length - 1][0],
-                    endTime: scheduleTableArr[table.rows.length - 1][1],
-                    day: col - 2
-                }
+        if (auxH === 23) {
+            if (auxM === 59) {
+                message.innerHTML = "Обратите внимание! Дальнейшее добавление строк невозможно, достигнут конец суток! Пожалуйста, отредактируйте имеющиеся строки и повторите попытку" //todo - ивентлистнеры на все спиннеры - если что-то меняется в спиннере, обновлять таблицу и массивчик (возможно, можно даж без массива обойтись)
+                return;
             }
-            fetch('/schedule/{userId}', {
-                method: 'DELETE',
-                headers: {
-                    'Content-type': 'application/json',
-                },
-                body: JSON.stringify(day)
-            })
         }
-        scheduleTableArr.pop();
-        table.deleteRow(rows.length - 1);
-        if (table.rows.length < 3) {
-            minusButtonTime.hidden = true;
-        }
-    }
 
 
-    function addDay() {
-        const table = document.getElementById("schedule");
-        const rows = table.rows;
-        const presentDaysAm = defaultDays.length;
-        let currCell;
-        for (let i = 0; i < rows.length; i++) {
+        const spinnerH1 = createSpinner();
+        spinnerH1.id = "spinner" + timeFormsCounter;
+        timeFormsCounter++;
+        const spinnerM1 = createSpinner();
+        spinnerM1.id = "spinner" + timeFormsCounter;
+        timeFormsCounter++;
+        const spinnerH2 = createSpinner();
+        spinnerH2.id = "spinner" + timeFormsCounter;
+        timeFormsCounter++;
+        const spinnerM2 = createSpinner();
+        spinnerM2.id = "spinner" + timeFormsCounter;
+        timeFormsCounter++;
 
 
-            if (i === 0) {
-                const headerRow = table.rows[0];
-                const cellValue = allDays[presentDaysAm].toString();
-
-                currCell = headerRow.insertCell(headerRow.cells.length - 1);
-                if (currCell) {
-                    currCell.innerHTML = cellValue;
-                }
-                scheduleTableArr[i].push(cellValue);
-                defaultDays.push(allDays[presentDaysAm]);
+        if (auxH === 23) {
+            spinnerH1.setValue(23);
+            if (auxM === 0 || auxM < 59) {
+                spinnerM1.setValue(auxM + 1);
             } else {
-                currCell = rows[i].insertCell(rows[i].cells.length - 1);
+                message.innerHTML = "Обратите внимание! Дальнейшее добавление строк невозможно, достигнут конец суток! Пожалуйста, отредактируйте имеющиеся строки и повторите попытку" //todo - ивентлистнеры на все спиннеры - если что-то меняется в спиннере, обновлять таблицу и массивчик (возможно, можно даж без массива обойтись)
+                return;
+            }
+        } else {
+            spinnerH1.setValue(parseInt(auxH) + 1);
+        }
+
+
+        if (spinnerH1.getValue() < 23) {
+            spinnerH2.setValue(parseInt(auxH) + 2);
+            spinnerM2.setValue(0);
+        } else {
+            spinnerH2.setValue(23);
+            spinnerM2.setValue(59);
+        }
+
+
+        let newRow = table.insertRow();
+
+
+        for (let i = 0; i < table.rows[0].cells.length - 1; i++) {
+            let currCell = newRow.insertCell();
+            if (i < 2) {
+                let spinnerH, spinnerM;
+                if (i === 0) {
+                    spinnerH = spinnerH1;
+                    spinnerM = spinnerM1;
+                } else {
+                    spinnerH = spinnerH2;
+                    spinnerM = spinnerM2;
+                }
+
+                const container = document.createElement('div');
+                container.style.display = 'flex'; // Используем flexbox для расположения спиннеров
+                container.style.alignItems = 'center'; // Выравниваем по центру по вертикали
+
+                // Добавляем спиннеры в контейнер
+                container.appendChild(spinnerH);
+                container.appendChild(spinnerM);
+
+                currCell.innerHTML = ""; // Очищаем ячейку
+                currCell.appendChild(container); // Добавляем контейнер в ячейку
+            } else {
                 const form = document.createElement("form");
+                form.id = "form" + formsCounter;
+                formsCounter++;
                 form.action = "";
                 form.method = "put";
                 const input = document.createElement("input");
@@ -302,219 +318,391 @@
                 input.value = "";
                 form.appendChild(input);
                 currCell.appendChild(form);
-
-
-                scheduleTableArr[i].push("");
             }
-
         }
-        if (defaultDays.length === 7) {
-            plusButtonDay.hidden = true;
-        } else if (defaultDays.length > 0) {
-            minusButtonDay.hidden = false;
+
+        if (minusButtonTime.style.display === "none") {
+            minusButtonTime.style.display = "inline";
         }
     }
 
-    function removeDay() {
-        const table = document.getElementById("schedule");
-        const rowsAmount = table.rows.length;
-        for (let i = 0; i < rowsAmount; i++) {
-            table.rows[i].deleteCell(table.rows[i].cells.length - 2);
-            scheduleTableArr[i].pop();
+    function removeTimeRow() {
+        const table = document.getElementById('schedule');
+        const rows = table.getElementsByTagName('tr');
+        const message = document.getElementById('stateMessage');
+        table.deleteRow(rows.length - 1);
+        timeFormsCounter = timeFormsCounter - 4;
+        if (table.rows.length < 3) {
+            minusButtonTime.style.display = "none";
+        }
+        if (message.innerHTML ===
+            "Обратите внимание! Дальнейшее добавление строк невозможно, достигнут конец суток! Пожалуйста, отредактируйте имеющиеся строки и повторите попытку") {
+            message.innerHTML = "";
+        }
+    }
 
+    {
+        function addDay() {
+            const table = document.getElementById("schedule");
+            const presentDaysAm = table.rows[0].cells.length - 3;
+
+            for (let i = 0; i < table.rows.length; i++) {
+                let currCell;
+                if (i === 0) {
+
+                    const headerRow = table.rows[0];
+                    const cellValue = allDays[presentDaysAm].toString();
+                    currCell = headerRow.insertCell(presentDaysAm + 2);
+                    currCell.style.background = "#99ccff";
+                    currCell.innerHTML = cellValue;
+                    currCell.style.fontWeight = "bold";
+                } else {
+                    currCell = table.rows[i].insertCell(presentDaysAm + 2);
+                    const form = document.createElement("form");
+                    form.id = "form" + formsCounter;
+                    formsCounter++;
+                    form.action = "";
+                    form.method = "put";
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.value = "";
+                    form.appendChild(input);
+                    currCell.appendChild(form);
+                }
+            }
+            if (table.rows[0].cells.length === 10) {//(7 дней+2 на время + 1 на кнопки)
+                plusButtonDay.style.display = "none";
+                minusButtonDay.style.display = "inline";
+            } else if (table.rows[0].cells.length > 4) {
+                plusButtonDay.style.display = "inline";
+                minusButtonDay.style.display = "inline";
+            }
         }
 
+        function removeDay() {
+            const table = document.getElementById("schedule");
+            const rowsAmount = table.rows.length;
+            const message = document.getElementById("stateMessage");
+            for (let i = 0; i < rowsAmount; i++) {
+                table.rows[i].deleteCell(table.rows[i].cells.length - 2);
+            }
 
-        defaultDays.pop();
 
-        if (defaultDays.length === 1) {
-            minusButtonDay.hidden = true;
-        } else if (defaultDays.length < 7) {
-            plusButtonDay.hidden = false;
+            if (table.rows[0].cells.length === 4) {
+                plusButtonDay.style.display = "inline";
+                minusButtonDay.style.display = "none";
+            } else if (table.rows[0].cells.length < 10) {
+                plusButtonDay.style.display = "inline";
+                minusButtonDay.style.display = "inline";
+            }
         }
     }
 
     function saveChanges() {
-        const totalUnsuccessfulRequests = saveChanges_db();
-        saveChanges_interface(totalUnsuccessfulRequests);
+        const table = document.getElementById("schedule");
+        const timesLength = table.rows.length - 1;
+        const daysLength = table.rows[0].cells.length - 3;
+        const message = document.getElementById("stateMessage");
+
+        let newStartTimes = [];
+        let newEndTimes = [];
+        let newDays = [];
+        let timeFormsCounter = 1;
+        let formsCounter = 0;
+        //заполняем массивы с новым
+        for (let i = 1; i < table.rows.length; i++) {
+            let newStartTime = document.getElementById("spinner" + timeFormsCounter).getValue();
+            timeFormsCounter++;
+            newStartTime = newStartTime + ":";
+            newStartTime = newStartTime + document.getElementById("spinner" + timeFormsCounter).getValue();
+            newStartTime = newStartTime + ":00";
+            //todo вынести в метод?
+            timeFormsCounter++;
+
+            console.log(newStartTime);
+
+            let newEndTime = document.getElementById("spinner" + timeFormsCounter).getValue();
+            timeFormsCounter++;
+            newEndTime = newEndTime + ":";
+            newEndTime = newEndTime + document.getElementById("spinner" + timeFormsCounter).getValue();
+            newEndTime = newEndTime + ":00";
+            timeFormsCounter++;
+
+
+            newStartTimes.push(newStartTime);
+            newEndTimes.push(newEndTime);
+
+        }
+        console.log(newStartTimes);
+        for (let i = 2; i < table.rows[0].cells.length - 1; i++) {
+            newDays.push(table.rows[0].cells[i].innerHTML);
+        }
+        for (let i = 0; i < timesLength; i++) {
+            if (!checkTime(newStartTimes, newEndTimes)) {
+                message.innerHTML = "Вы чо!";
+                return;
+            }
+        }
+
+
+        //сначала удаляем старые ячейки, которых у нас теперь нет; проходим по дефолтам и смотрим, есть ли значения из них в актуальных массивах
+
+        //строки
+        for (let i = 0; i < defaultStartTimes.length; i++) {
+            if (!(newStartTimes.includes(defaultStartTimes[i])) || !(newEndTimes.includes(defaultEndTimes[i]))) {
+                let toDelete = {
+                    id: {
+                        startTime: defaultStartTimes[i],
+                        endTime: defaultEndTimes[i]
+                    }
+                };
+
+                fetch('/schedule/' + userId, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-type': 'application/json',
+                    },
+                    body: JSON.stringify(toDelete)
+                });
+            }
+        }
+
+
+        //столбцы
+        for (let i = 0; i < defaultDays.length; i++) {
+            if (!(newDays.includes(defaultDays[i]))) {
+                let toDelete = {
+                    id: {
+                        day: defaultDays[i]
+                    }
+                };
+                fetch('/schedule/' + userId, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-type': 'application/json',
+                    },
+                    body: JSON.stringify(toDelete)
+                });
+                defaultDays.splice(i, 1);
+            }
+        }
+
+
+        //удалили неактуальные значения из дефолтов; потом идем по всем, если находим полностью совпадающее с дефолтом - пут, если находится что-то новое - пост
+
+        for (let i = 0; i < newDays.length; i++) { //смотрим дни, если каких-то нет в дефолтах - добавляем их туда
+            if (!(defaultDays.includes(newDays[i]))) {
+                defaultDays.push(newDays[i]);
+            }
+        }
+
+        for (let i = 0; i < timesLength; i++) {
+            const currStartTime = newStartTimes[i];
+            const currEndTime = newEndTimes[i]; //берем два времени и смотрим, пересекаются ли они с дефолтами
+
+            console.log(currStartTime);
+            console.log(currEndTime);
+
+            if (defaultStartTimes.includes(currStartTime) && defaultEndTimes.includes(currEndTime)) {
+                for (let j = 0; j < defaultDays.length; j++) {
+                    let newCell = {
+                        id: {
+                            startTime: currStartTime,
+                            endTime: currEndTime,
+                            day: defaultDays[j]
+                        },
+                        content: table.rows[i + 1].cells[j + 2].querySelector('input').value,
+                        userId: userId
+                    };
+                    formsCounter++;
+                    fetch('/schedule/' + userId, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-type': 'application/json',
+                        },
+                        body: JSON.stringify(newCell)
+                    })
+                }
+            } else {
+                for (let j = 0; j < defaultDays.length; j++) {
+                    let newCell = {
+                        id: {
+                            startTime: currStartTime,
+                            endTime: currEndTime,
+                            day: defaultDays[j]
+                        },
+                        content: table.rows[i + 1].cells[j + 2].querySelector('input').value,
+                        userId: userId
+                    };
+                    formsCounter++;
+                    fetch('/schedule/' + userId, {
+                        method: 'POST',
+                        headers: {
+                            'Content-type': 'application/json',
+                        },
+                        body: JSON.stringify(newCell)
+                    })
+                }
+            }
+        }
+        saveChanges_interface(newStartTimes, newEndTimes);
     }
 
-    async function getUnsuccessfulRequestsAmount(day, totalUnsuccessfulRequests) {
-        await fetch('/schedule/'+userId, {
-            method: 'PUT',
-            headers: {
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify(day)
-        }).then(response => {
-            if (!response.ok) {
-                totalUnsuccessfulRequests++;
+    function saveChanges_interface(startTimes, endTimes) {
+        const table = document.getElementById("schedule");
+
+
+        let timeFormsCounter = 1;
+        let formsCounter = 1;
+        let inputs = document.querySelectorAll('input[maxlength="100"]');
+        for (let i = 1; i < table.rows.length; i++) { //ряд
+            for (let j = 0; j < table.rows[0].cells.length - 1; j++) {//столбец
+                if (j === 0) {
+                    table.rows[i].cells[j].innerHTML = startTimes[i - 1].split(":")[0] + ":" + startTimes[i - 1].split(":")[1];
+                } else if (j === 1) {
+                    table.rows[i].cells[j].innerHTML = endTimes[i - 1].split(":")[0] + ":" + endTimes[i - 1].split(":")[1];
+
+                } else {
+                    table.rows[i].cells[j].innerHTML = table.rows[i].cells[j].querySelector('input').value;
+                    formsCounter++;
+
+                }
+                (table.rows[i].cells[j].innerHTML)
+            }
+        }
+
+
+        plusButtonTime.style.display = "none";
+        minusButtonTime.style.display = "none";
+        plusButtonDay.style.display = "none";
+        minusButtonDay.style.display = "none";
+        saveButton.style.display = "none";
+        editButton.style.display = "inline"
+    }
+
+
+    function createSpinner() {
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner';
+
+        const increaseButton = document.createElement('button');
+        increaseButton.className = 'button';
+        increaseButton.innerText = '▲';
+
+        const inputField = document.createElement('input');
+        inputField.type = 'text';
+        inputField.className = 'input-field';
+        inputField.value = '00';
+        inputField.readOnly = true;
+
+        const decreaseButton = document.createElement('button');
+        decreaseButton.className = 'button';
+        decreaseButton.innerText = '▼';
+
+        let value = 0;
+        let maxValue = 59;
+
+        function updateValue() {
+            inputField.value = value.toString().padStart(2, '0');
+        }
+
+        function increaseValue() {
+            if (value < maxValue) {
+                value++;
+                updateValue();
+            }
+        }
+
+        function decreaseValue() {
+            if (value > 0) {
+                value--;
+                updateValue();
+            }
+        }
+
+        increaseButton.addEventListener('mousedown', () => {
+            increaseValue();
+            intervalId = setInterval(increaseValue, 500); // Увеличение каждые 100 мс
+        });
+
+        decreaseButton.addEventListener('mousedown', () => {
+            decreaseValue();
+            intervalId = setInterval(decreaseValue, 500); // Уменьшение каждые 100 мс
+        });
+
+        spinner.setValue = function (newValue) {
+            if (newValue >= 0 && newValue <= maxValue) {
+                value = newValue;
+                updateValue();
+            }
+
+
+        };
+        spinner.setHourMode = function () {
+            maxValue = 23;
+        };
+        spinner.setMinuteMode = function () {
+            maxValue = 59;
+        };
+        spinner.getValue = function () {
+            return String(value).padStart(2, '0');
+        };
+        // Остановка увеличения/уменьшения при отпускании кнопки
+        increaseButton.addEventListener('mouseup', () => clearInterval(intervalId));
+        decreaseButton.addEventListener('mouseup', () => clearInterval(intervalId));
+
+        // Также останавливаем интервал при выходе курсора за пределы кнопки
+        increaseButton.addEventListener('mouseleave', () => clearInterval(intervalId));
+        decreaseButton.addEventListener('mouseleave', () => clearInterval(intervalId));
+
+        spinner.addEventListener('input', function () {
+            for (let i = 0; i < scheduleTable.rows.length; i++) {
+                for (let j = 0; j < scheduleTable.rows[0].cells.length; j++) {
+                    (scheduleTable.rows[i].cells[j].innerHTML);
+                }
             }
         });
 
-        return totalUnsuccessfulRequests;
+        spinner.appendChild(increaseButton);
+        spinner.appendChild(inputField);
+        spinner.appendChild(decreaseButton);
+
+        return spinner;
     }
 
-    function saveChanges_interface(totalUnsuccessfulRequests) {
-        const table = document.getElementById("schedule");
+    function checkTime(startTimes, endTimes) {
+        for (let i = 0; i < startTimes.length; i++) {
+            const startHour = startTimes[i].split(":")[0];
+            const startMinute = startTimes[i].split(":")[1];
+
+            const endHour = endTimes[i].split(":")[0];
+            const endMinute = endTimes[i].split(":")[1];
 
 
-        let formsCounter = 0;
+            if (startHour >= endHour) {
+                if (startHour === endHour && startMinute >= endMinute) {
+                    return false;
+                }
+                return false;
+            }//начало раньше конца?
+            if (i > 0) {
+                const endHour1 = endTimes[i - 1].split(":")[0];
+                const endMinute1 = endTimes[i - 1].split(":")[1];
 
-        let inputs = document.querySelectorAll('input[type="text"]');
-
-        const message = document.getElementById("stateMessage");
-
-        if (totalUnsuccessfulRequests > 0) {
-            if (message.hidden) {
-                message.hidden = false;
-            }
-            message.style.color = "red";
-            message.textContent = "Произошла ошибка! Проверьте корректность введенных данных";
-
-        } else {
-            if (message.hidden) {
-                message.hidden = false;
-            }
-            message.style.color = "green";
-            message.textContent = "Успешно сохранено!";
-            formsCounter = 0;
-            outer: for (let row = 1; row < table.rows.length; row++) {
-                for (let col = 0; col < table.rows[0].cells.length - 1; col++) {
-                    if (formsCounter >= inputs.length) {
-                        break outer;
+                if (startHour >= endHour1) {
+                    if (startHour === endHour1 && startMinute >= endMinute1) {
+                        return false;
                     }
-                    table.rows[row].cells[col].innerHTML = inputs[formsCounter].value;
-                    formsCounter++;
-                }
-            }
-            plusButtonTime.remove();
-            minusButtonTime.remove();
-
-            plusButtonDay.remove();
-            minusButtonDay.remove();
-
-            editButton.hidden = false;
-            saveButton.style.display = "none";
+                    return false;
+                } //проверку на раньше/позже можно вынести в метод
+            } //начало данного позже конца предыдущего?
         }
+        return true;
     }
-
-    async function saveChanges_db() {
-
-
-        let dbSingleDays;
-
-        let totalUnsuccessfulRequests = 0;
-
-        const table = document.getElementById("schedule");
-
-
-        let formsCounter = 0;
-
-        let inputs = document.querySelectorAll('input[type="text"]');
-
-        for (let row = 0; row < table.rows.length; row++) {
-            for (let col = 0; col < table.rows[0].cells.length - 1; col++) {
-                if (row === 0) {
-                    scheduleTableArr[row][col] = table.rows[row].cells[col].innerHTML;
-                } else {
-                    scheduleTableArr[row][col] = inputs[formsCounter].value;
-                    formsCounter++;
-                }
-            }
-        }
-
-        for (let row = 1; row < scheduleTableArr.length; row++) {
-            for (let col = 2; col < scheduleTableArr[0].length; col++) {
-                let day = {
-                    id: {
-                        startTime: scheduleTableArr[row][0],
-                        endTime: scheduleTableArr[row][1],
-                        day: scheduleTableArr[0][col],
-                    },
-                    content: scheduleTableArr[row][col],
-                    userId: userId
-                }
-                totalUnsuccessfulRequests += await getUnsuccessfulRequestsAmount(day, totalUnsuccessfulRequests);
-            }
-        }
-
-
-        await fetch('/get_db_content/' + userId)
-            .then(response => response.json())
-            .then(data => {
-                dbSingleDays = data;
-            })
-            .catch(error => console.error('Ошибка:', error));
-
-        for (let i = 0; i < dbSingleDays.length; i++) {
-            let startTimeFromDatabase = dbSingleDays[i].startTime;
-            let endTimeFromDatabase = dbSingleDays[i].endTime;
-
-            let startTimeParts = startTimeFromDatabase.split(':');
-            let endTimeParts = endTimeFromDatabase.split(':');
-
-
-            dbSingleDays[i].startTime = startTimeParts.slice(0, 2).join(':');
-            dbSingleDays[i].endTime = endTimeParts.slice(0, 2).join(':');
-
-        }
-
-
-        let doNotRemove = [];
-        for (let row = 1; row < scheduleTableArr.length; row++) {
-            for (let col = 2; col < scheduleTableArr[0].length; col++) {
-                for (let dbElement = 0; dbElement < dbSingleDays.length; dbElement++) {
-                    if (dbSingleDays[dbElement].startTime === scheduleTableArr[row][0] &&
-                        dbSingleDays[dbElement].endTime === scheduleTableArr[row][1] &&
-                        dbSingleDays[dbElement].day === scheduleTableArr[0][col]) {
-                        doNotRemove.push(dbSingleDays[dbElement]);
-                        break;
-                    }
-                }
-            }
-        }
-        removeDeletedCellsFromDb(dbSingleDays, doNotRemove);
-
-
-        return totalUnsuccessfulRequests;
-    }
-
-    function removeDeletedCellsFromDb(db, doNotRemove) {
-        for (let DNRindex = 0; DNRindex < doNotRemove.length; DNRindex++) {
-
-            for (let dbIndex = 0; dbIndex < db.length; dbIndex++) {
-                if (db[dbIndex] === doNotRemove[DNRindex]) {
-                    db.splice(dbIndex, 1);
-                    break;
-                }
-            }
-        }
-
-
-        for (let dbIndex = 0; dbIndex < db.length; dbIndex++) {
-            let day = {
-                id: {
-                    startTime: db[dbIndex].startTime,
-                    endTime: db[dbIndex].endTime,
-                    day: db[dbIndex].day
-                }
-            }
-
-            fetch('/schedule/'+userId, {
-                method: 'DELETE',
-                headers: {
-                    'Content-type': 'application/json',
-                },
-                body: JSON.stringify(day)
-            })
-        }
-    }
-
 
     document.getElementById('saveButton').addEventListener('click', saveChanges)
 
-
+    //TODO: как разберусь с норм отправкой запросов, убрать этот позорный спиннер и поменять н jquery
 </script>
 
 </body>

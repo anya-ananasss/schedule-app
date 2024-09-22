@@ -18,7 +18,10 @@ public class UserController {
     private final UserService userService;
     private final ScheduleService scheduleService;
     @GetMapping("/registration")
-    public String showRegistrationForm() {
+    public String showRegistrationForm(Model model, @RequestParam(required = false) boolean error) {
+        if (error){
+            model.addAttribute("stateMessage", "Не удалось зарегистрироваться! Возможно, пользователь с данным именем или почтой уже существует.");
+        }
         return "registration";
     }
     @GetMapping("/login")
