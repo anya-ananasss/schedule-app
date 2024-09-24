@@ -19,8 +19,7 @@ public class UserController {
     private final UserService userService;
     private final ScheduleService scheduleService;
     @GetMapping("/registration")
-    public String showRegistrationForm(Model model) {
-        model.addAttribute("stateMessage", ":)");
+    public String showRegistrationForm() {
         return "registration";
     }
     @GetMapping("/login")
