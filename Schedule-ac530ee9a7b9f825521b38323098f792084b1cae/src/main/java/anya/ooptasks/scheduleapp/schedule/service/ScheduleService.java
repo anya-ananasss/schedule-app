@@ -59,9 +59,4 @@ public class ScheduleService {
         return repository.findAllDistinctEndTimes(userId);
     }
 
-    public List<Schedule.JointId> findAllIds(User userId) {
-        return repository.findAllIds(userId);
-    }
-
-
 }

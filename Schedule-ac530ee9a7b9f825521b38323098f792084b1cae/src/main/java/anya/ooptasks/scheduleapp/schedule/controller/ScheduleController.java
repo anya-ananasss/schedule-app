@@ -65,14 +65,6 @@ public class ScheduleController {
     }
 
     @ResponseBody
-    @GetMapping("/get_db_content/{userId}")
-    public List<Schedule.JointId> findAllIds(@PathVariable int userId) {
-        User user = userService.findUserById(userId);
-        return scheduleService.findAllIds(user);
-    }
-
-
-    @ResponseBody
     @Transactional
     @PutMapping("/schedule/{userId}")
     public void updateChanges(@RequestBody Schedule schedule, @PathVariable int userId) {

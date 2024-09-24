@@ -33,9 +33,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Schedule.Joi
     @Query ("DELETE FROM Schedule day WHERE day.id.day = :day and day.id.userId = :userId")
     void deleteAllByDay(DayOfWeek day, User userId);
 
-    @Query ("SELECT day.id FROM Schedule day WHERE day.id.userId = :userId")
-    List<Schedule.JointId> findAllIds (User userId);
-
     @Modifying
     @Query ("UPDATE Schedule day SET day.content = :content WHERE day.id = :id")
     void updateSch(Schedule.JointId id, String content);

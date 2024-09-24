@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f8ff; /* Нежно-голубой фон */
+    background-color: #f0f8ff;
     color: #333;
     margin: 0;
     padding: 0;
@@ -47,11 +47,14 @@ input[type="submit"] {
     border-radius: 5px;
     outline: none;
     transition: border-color 0.3s;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 input[type="text"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+input[type="number"]{
     padding: 10px;
     border: 1px solid #007bff;
     border-radius: 5px;
@@ -65,6 +68,10 @@ input[type="submit"] {
     cursor: pointer;
 }
 
+input[type="number"]{
+    width: 50%;
+    box-sizing: border-box;
+}
 input[type="submit"]:hover {
     background-color: #0056b3;
 }
@@ -85,6 +92,7 @@ table {
     background: white;
     border-spacing: 0;
     margin-top: 10px;
+    table-layout: fixed;
 }
 
 td:nth-child(1),
@@ -95,7 +103,10 @@ th, td {
     padding: 10px;
     text-align: center;
     border: 1px solid darkblue;
+    word-wrap: break-word; /* Перенос слов */
+    overflow-wrap: break-word; /* Перенос слов */
 }
+
 
 th {
     background-color: #99ccff;

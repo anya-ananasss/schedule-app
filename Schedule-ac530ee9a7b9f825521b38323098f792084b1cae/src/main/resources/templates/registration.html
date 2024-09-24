@@ -11,26 +11,24 @@
     <h2>Регистрация</h2>
     <form action="#">
         <div class="input-box">
-            <input type="text" id="username" placeholder="Введите имя пользователя" required>
+            <label for="username"></label><input type="text" id="username" placeholder="Введите имя пользователя" required>
         </div>
         <div class="input-box">
-            <input type="email" id="email" placeholder="Введите адрес электронной почты" required>
+            <label for="email"></label><input type="email" id="email" placeholder="Введите адрес электронной почты" required>
         </div>
         <div class="input-box">
-            <input type="password" id="password" placeholder="Придумайте пароль" required>
+            <label for="password"></label><input type="password" id="password" placeholder="Придумайте пароль" required>
         </div>
         <div class="input-box">
-            <input type="password" id="confirmPassword" placeholder="Повторите пароль" required>
+            <label for="confirmPassword"></label><input type="password" id="confirmPassword" placeholder="Повторите пароль" required>
         </div>
         <div class="input-box button">
             <input type="submit" id="saveButton" value="Зарегистрироваться">
         </div>
     </form>
     <div><a href="/login">У меня уже есть аккаунт</a></div>
-    <div id="stateMessage" th:text="${stateMessage}"></div>
+    <div style="text-align: center" id="stateMessage" th:text="${stateMessage}"></div>
 </div>
-
-
 <script th:inline="javascript">
     const saveButton = document.getElementById("saveButton");
     const message = document.getElementById("stateMessage");

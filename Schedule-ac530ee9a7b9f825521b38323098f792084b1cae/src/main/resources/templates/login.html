@@ -11,15 +11,19 @@
     <form name='f' action="/login" method='POST'>
         <div>Имя пользователя:</div>
 
-        <div><input type='text' name='username' value=''/></div>
+        <div>
+            <label for="username"></label><input type='text' id="username" name='username' placeholder="Имя пользователя"/>
+        </div>
 
         <div>Пароль:</div>
 
-        <div><input type='password' name='password'/></div>
+        <div>
+            <label for="password"></label><input type='password' id="password" name='password' placeholder="Пароль"/>
+      </div>
         <div><input name="submit" type="submit" value="Войти"/></div>
 
-        <div>Новый пользователь? <a href="/registration">Зарегистрироваться</a></div>
-        <div id="stateMessage" th:text="${stateMessage}"></div>
+        <div style="text-align: center">Новый пользователь? <a href="/registration">Зарегистрироваться</a></div>
+        <div style="text-align: center" id="stateMessage" th:text="${stateMessage} "></div>
     </form>
 </div>
 </body>

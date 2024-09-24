@@ -41,9 +41,5 @@ public class User {
     @OneToMany(mappedBy="user_id")
     private Set<Schedule> schedules;
 
-
-    public User(int id) {
-        this.id = id;
-    }
 }
 
