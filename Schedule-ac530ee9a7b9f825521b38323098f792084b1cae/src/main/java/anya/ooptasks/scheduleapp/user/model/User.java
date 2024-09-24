@@ -25,10 +25,12 @@ public class User {
     private int id;
     @NotNull
     @NotEmpty
+    @Column(unique = true)
     private String username;
 
     @NotNull
     @NotEmpty
+    @Column(unique = true)
     private String email;
 
     @NotNull
