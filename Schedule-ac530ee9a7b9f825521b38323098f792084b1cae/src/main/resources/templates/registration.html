@@ -40,10 +40,24 @@
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    function saveUser_fetchReq() {
+
+    async function save(){
+        event.preventDefault();
+        let err = await saveUser_fetchReq()
+
+        if (!err){
+       //ошибки нет
+            message.innerHTML="";
+            window.location.href="login";
+        } else { //ошибка есть
+            message.innerHTML = "Не удалось зарегистрироваться! Возможно, пользователь с таким именем или адресом электронной почты уже существует.";
+        }
+    }
+    async function saveUser_fetchReq() {
         const username = usernameInput.value;
         const email = emailInput.value;
         const password = passwordInput.value;
+        let err = false;
         const confirmPassword = confirmPasswordInput.value;
         if (password !== confirmPassword) {
             message.textContent = "Пароли не совпадают! Повторите попытку";
@@ -55,7 +69,7 @@
                 email: email,
                 password: password
             };
-            fetch('/registration', {
+            await fetch('/registration', {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json'
@@ -63,22 +77,15 @@
                 body: JSON.stringify(newUser)
             })
                 .then(response => {
-                    if (response.ok){
-                        window.location.href = "/login";
-                    } else {
-                        return response.text().then(text => {
-                            throw new Error(text);
-                        });
+                    if (!response.ok) {
+                        err = true;
                     }
                 })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    message.textContent = error.message;
-                });
         }
+        return err;
     }
 
-    saveButton.addEventListener('click', saveUser_fetchReq);
+    saveButton.addEventListener('click', save);
 </script>
 </body>
 </html>

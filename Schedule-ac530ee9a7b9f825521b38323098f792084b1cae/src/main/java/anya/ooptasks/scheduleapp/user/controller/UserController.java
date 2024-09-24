@@ -6,10 +6,11 @@ import anya.ooptasks.scheduleapp.schedule.service.ScheduleService;
 import anya.ooptasks.scheduleapp.user.model.User;
 import anya.ooptasks.scheduleapp.user.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
+
 
 @Controller
 @AllArgsConstructor
@@ -18,10 +19,8 @@ public class UserController {
     private final UserService userService;
     private final ScheduleService scheduleService;
     @GetMapping("/registration")
-    public String showRegistrationForm(Model model,  @RequestParam(required = false) boolean error) {
-        if (error){
-            model.addAttribute("stateMessage", "Не удалось зарегистрироваться!");
-        }
+    public String showRegistrationForm(Model model) {
+        model.addAttribute("stateMessage", ":)");
         return "registration";
     }
     @GetMapping("/login")
@@ -37,15 +36,15 @@ public class UserController {
             return "login";
     }
 
-    @ResponseBody
+
     @PostMapping("/registration")
-    public RedirectView registerUserAccount(@RequestBody User user){
+    public ResponseEntity<Void> registerUserAccount(@RequestBody User user) {
         try {
             userService.registerNewUserAccount(user);
             scheduleService.createDefaultSchedule(user);
-            return new RedirectView("/login");
-        } catch (UsernameAlreadyExistException | EmailAlreadyExistException usernameEx){
-            return new RedirectView("/registration");
+            return ResponseEntity.ok().build();
+        } catch (UsernameAlreadyExistException | EmailAlreadyExistException usernameEx) {
+            return ResponseEntity.badRequest().build();
         }
     }
 }
