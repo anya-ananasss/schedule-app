@@ -46,10 +46,9 @@
         let err = await saveUser_fetchReq()
 
         if (!err){
-       //ошибки нет
             message.innerHTML="";
             window.location.href="login";
-        } else { //ошибка есть
+        } else {
             message.innerHTML = "Не удалось зарегистрироваться! Возможно, пользователь с таким именем или адресом электронной почты уже существует.";
         }
     }
