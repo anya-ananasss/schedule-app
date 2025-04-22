@@ -51,7 +51,6 @@ function startEditing() {
     const table = document.getElementById('schedule');
 
     let currCell;
-    //edit time cells
     for (let i = 1; i < table.rows.length; i++) {
         for (let j = 0; j < 2; j++) {
             currCell = table.rows[i].cells[j];
@@ -72,7 +71,7 @@ function startEditing() {
         }
     }
 
-    //edit other
+
     for (let i = 1; i < table.rows.length; i++) {
         for (let j = 2; j < table.rows[0].cells.length - 1; j++) {
             currCell = table.rows[i].cells[j];
@@ -256,7 +255,7 @@ function addDay() {
             addForm(currCell);
         }
     }
-    if (table.rows[0].cells.length === 10) {//(7 дней+2 на время + 1 на кнопки)
+    if (table.rows[0].cells.length === 10) {
         plusButtonDay.style.display = "none";
         minusButtonDay.style.display = "inline";
     } else if (table.rows[0].cells.length > 4) {
@@ -292,10 +291,8 @@ function saveChanges() {
     let newEndTimes = [];
     let newDays = [];
     let timeFormsCounter = 1;
-    //заполняем массивы с новым
     for (let i = 1; i < table.rows.length; i++) {
         let initRes = initNewTimeArrElement(timeFormsCounter);
-        console.log("init res " + initRes);
         let newStartTime = initRes[0];
         timeFormsCounter = initRes[1];
 
@@ -311,8 +308,6 @@ function saveChanges() {
     for (let i = 2; i < table.rows[0].cells.length - 1; i++) {
         newDays.push(table.rows[0].cells[i].innerHTML);
     }
-    console.log(newStartTimes);
-    console.log(newEndTimes);
     for (let i = 0; i < timesLength; i++) {
         if (!checkTime(newStartTimes, newEndTimes)) {
             message.style.color = "#8B0000";
@@ -322,9 +317,7 @@ function saveChanges() {
     }
 
 
-    //сначала удаляем старые ячейки, которых у нас теперь нет; проходим по дефолтам и смотрим, есть ли значения из них в актуальных массивах
 
-    //строки
     for (let i = 0; i < defaultStartTimes.length; i++) {
         if (!(newStartTimes.includes(defaultStartTimes[i])) || !(newEndTimes.includes(defaultEndTimes[i]))) {
             let toDelete = {
@@ -341,7 +334,6 @@ function saveChanges() {
                 },
                 body: JSON.stringify(toDelete)
             }).then(data => {
-                console.log(data);
             })
                 .catch(error => {
                     console.error('Ошибка:', error);
@@ -350,7 +342,6 @@ function saveChanges() {
     }
 
 
-    //столбцы
     for (let i = 0; i < defaultDays.length; i++) {
         if (!(newDays.includes(defaultDays[i]))) {
             let toDelete = {
@@ -365,7 +356,6 @@ function saveChanges() {
                 },
                 body: JSON.stringify(toDelete)
             }).then(data => {
-                console.log(data);
             })
                 .catch(error => {
                     console.error('Ошибка:', error);
@@ -375,11 +365,10 @@ function saveChanges() {
     }
 
 
-    //удалили неактуальные значения из дефолтов; потом идем по всем, если находим полностью совпадающее с дефолтом - пут, если находится что-то новое - пост
 
     for (let i = 0; i < timesLength; i++) {
         const currStartTime = newStartTimes[i];
-        const currEndTime = newEndTimes[i]; //берем два времени и смотрим, пересекаются ли они с дефолтами
+        const currEndTime = newEndTimes[i];
 
         if (defaultStartTimes.includes(currStartTime) && defaultEndTimes.includes(currEndTime)) {
             for (let j = 0; j < newDays.length; j++) {
@@ -400,7 +389,6 @@ function saveChanges() {
                         },
                         body: JSON.stringify(newCell)
                     }).then(data => {
-                        console.log(data);
                     })
                         .catch(error => {
                             console.error('Ошибка:', error);
@@ -422,7 +410,6 @@ function saveChanges() {
                         },
                         body: JSON.stringify(newCell)
                     }).then(data => {
-                        console.log(data);
                     })
                         .catch(error => {
                             console.error('Ошибка:', error);
@@ -448,7 +435,6 @@ function saveChanges() {
                     },
                     body: JSON.stringify(newCell)
                 }).then(data => {
-                    console.log(data);
                 })
                     .catch(error => {
                         console.error('Ошибка:', error);
@@ -467,7 +453,6 @@ function initNewTimeArrElement(timeFormsCounter) {
     newTime = newTime + document.getElementById("spinner" + timeFormsCounter).value;
     newTime = newTime + ":00";
     timeFormsCounter++;
-    console.log(newTime);
     return [newTime, timeFormsCounter];
 }
 
@@ -475,8 +460,8 @@ function saveChanges_interface(startTimes, endTimes) {
     const table = document.getElementById("schedule");
 
 
-    for (let i = 1; i < table.rows.length; i++) { //ряд
-        for (let j = 0; j < table.rows[0].cells.length - 1; j++) {//столбец
+    for (let i = 1; i < table.rows.length; i++) {
+        for (let j = 0; j < table.rows[0].cells.length - 1; j++) {
             if (j === 0) {
                 table.rows[i].cells[j].innerHTML = startTimes[i - 1].split(":")[0] + ":" + startTimes[i - 1].split(":")[1];
             } else if (j === 1) {
@@ -537,7 +522,7 @@ function checkTime(startTimes, endTimes) {
             } else if (startHour > endHour) {
                 return false;
             }
-        }//начало раньше конца?
+        }
         if (i > 0) {
             const endHour1 = endTimes[i - 1].split(":")[0];
             const endMinute1 = endTimes[i - 1].split(":")[1];
@@ -548,7 +533,7 @@ function checkTime(startTimes, endTimes) {
                     return false;
                 }
             }
-        } //начало данного позже конца предыдущего?
+        }
     }
     return true;
 }
