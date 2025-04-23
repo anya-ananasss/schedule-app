@@ -9,7 +9,7 @@
 ## Стек технологий
 - Spring Boot
 - Spring Security 
-- Hibernate
+- Spring Data JPA
 - PostgreSQL
 - Docker
 - Thymeleaf
